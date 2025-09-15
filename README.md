@@ -16,7 +16,7 @@
 ## Descrição
 
 <p align="center">
-<img src="https://github.com/user-attachments/assets/f3452d81-193b-4c03-a09b-326df6ad02a9" alt="Logotipo Instituto Alma" border="0">
+<img src="https://github.com/user-attachments/assets/8200e0b6-c6e4-4ace-acc6-841bddd07332" border="0">
 
 </p>
 
