@@ -21,11 +21,9 @@
 </p>
 
 
-De um a dois parágrafos sobre o que é seu projeto e o que ele faz.
+O projeto em questão é o desenvolvimento de um site web responsivo e dinâmico para o Instituto Alma, uma organização não governamental. O objetivo é criar uma presença online robusta para a ONG, permitindo que ela aumente sua visibilidade, se conecte com voluntários e doadores, e divulgue seus projetos e iniciativas.
 <br><br>
-Meu projeto ajuda estudantes FECAP a configurarem seus githubs.
-<br><br>
-May the force be with you!
+A plataforma está sendo construída com uma arquitetura de pilha completa, utilizando React no front-end para criar uma interface de usuário interativa, e Node.js e JavaScript no back-end para gerenciar a lógica do servidor e a comunicação com o banco de dados. O site utiliza o MySQL Workbench para o gerenciamento do banco de dados, e o design foi totalmente elaborado no Figma, garantindo uma experiência de usuário visualmente atraente e coesa.
 <br><br>
 
 ## 🛠 Estrutura de pastas
