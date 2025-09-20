@@ -34,10 +34,6 @@ A plataforma está sendo construída com uma arquitetura de pilha completa, util
   &emsp;|-->Entrega 1> 
   
   &emsp;|-->Entrega 2>
-  
-  &emsp;|-->Entrega 3>
-  
-  &emsp;|-->Entrega 4>
 
   &emsp;|-->README.md>
   
@@ -46,19 +42,3 @@ A plataforma está sendo construída com uma arquitetura de pilha completa, util
   &emsp;|-->Backend<br>
   &emsp;|-->Frontend<br>
 |readme.md<br>
-
-A pasta raiz contem dois arquivos que devem ser alterados:
-
-<b>README.MD</b>: Arquivo que serve como guia e explicação geral sobre seu projeto. O mesmo que você está lendo agora.
-
-Há também 4 pastas que seguem da seguinte forma:
-
-<b>imagens</b>: Imagens do sistema
-
-<b>src</b>: Pasta que contém o código fonte.
-
-
-
-## 🎓 Referências
-
-Aqui estão as referências usadas no projeto.
