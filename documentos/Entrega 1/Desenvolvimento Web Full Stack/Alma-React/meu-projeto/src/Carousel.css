@@ -1,0 +1,61 @@
+.carousel {
+    width: 100%;            
+    max-width: 800px;       
+    margin: auto;
+    justify-content: center;
+}
+
+/* Área da imagem */
+.carousel-inner {
+    position: relative;     /* permite colocar botões dentro */
+}
+
+.carousel-inner img {
+    width: 100%;
+    border-radius: 10px;
+    display: block;
+}
+
+/* Botões dentro do carousel */
+.btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 50%;
+}
+
+.btn.prev { left: 10px; }
+.btn.next { right: 10px; }
+
+
+
+/* Bolinhas (dots) */
+.dots {
+    position: absolute;
+    bottom: 12px;          /* distância da borda inferior*/
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.dot {
+    height: 12px;
+    width: 12px;
+    margin: 0 4px;
+    display: inline-block;
+    border-radius: 50%;
+    background: #bbb;
+    cursor: pointer;
+}
+
+.dot.active {
+    background: #333;
+}

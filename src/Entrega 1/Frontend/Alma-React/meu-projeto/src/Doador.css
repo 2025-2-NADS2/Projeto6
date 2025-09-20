@@ -1,0 +1,39 @@
+.doador-titulo{
+    padding: 0px 0px 0px 16px;
+}
+
+.doador-lista {
+    padding: 0px 10px 20px 10px;
+}
+  
+  .doador-lista > ul {
+    list-style: none;        
+    padding: 0;
+    margin: 0;
+    border: 5px solid var(--cor3);
+    background-color: var(--cor2);
+    border-radius: 5px;       
+    overflow: hidden;         
+  }
+  
+  .doador-lista > ul li {
+    display: grid;            
+    grid-template-columns: max-content 1fr; 
+    padding: 10px 15px;
+    border-bottom: 1px solid #969696; 
+  }
+
+  .doador-lista > ul li div {
+    font-weight: bold;
+    padding-right: 10px;
+    border-right: 1px solid #999; /* divisória entre nome e email */
+  }
+
+  .doador-lista > ul li span {
+    padding-left: 10px;
+  }
+  
+  .doador-lista > ul li:last-child {
+    border-bottom: none;      
+  }
+  
