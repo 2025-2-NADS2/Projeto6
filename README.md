@@ -54,4 +54,8 @@ Encontre o site do instituto alma criado pelo nosso grupo aqui:
 
 ## 🎓 Referências
 
+Aqui estão as referências usadas no projeto.
+
+1. https://github.com/fecaphub/Template_PI
+
 
