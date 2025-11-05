@@ -42,3 +42,16 @@ A plataforma está sendo construída com uma arquitetura de pilha completa, util
   &emsp;|-->Backend<br>
   &emsp;|-->Frontend<br>
 |readme.md<br>
+
+## 🛠 Instalação
+
+<b>Windows:</b>
+
+Não há instalação! Apenas nosso site!
+Encontre o site do instituto alma criado pelo nosso grupo aqui: 
+
+## 📋 Licença/License
+
+## 🎓 Referências
+
+
