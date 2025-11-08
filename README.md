@@ -7,8 +7,7 @@
 
 # Site Instituto Alma
 
-## FITP
-
+## Deximal
 ## Integrantes: <a href="https://www.linkedin.com/in/andre-ferreira-ab5818379/">André Ferreira</a>, <a href="https://www.linkedin.com/in/cauan-moreira-2a9477335/">Cauan Moreira</a>, <a href="https://www.linkedin.com/in/rogeriorv/">Rogério Vieira</a>, <a href="https://www.linkedin.com/in/victor-bancatelli/">Victor Bancatelli</a>
 
 ## Professores Orientadores: <a href="https://www.linkedin.com/in/francisco-escobar/">Francisco Escobar</a>, <a href="https://www.linkedin.com/in/eduardo-savino-gomes-77833a10/">Eduardo Savino Gomes</a>, <a href="https://www.linkedin.com/in/jbuesso/">José Buesso</a>, <a href="https://www.linkedin.com/in/victorbarq/">Victor Rosetti</a>, <a href="https://www.linkedin.com/in/ronaldo-araujo-pinto-3542811a/">Ronaldo Araujo Pinto</a>
@@ -51,6 +50,8 @@ Não há instalação! Apenas nosso site!
 Encontre o site do instituto alma criado pelo nosso grupo aqui: 
 
 ## 📋 Licença/License
+
+<a href="https://github.com/2025-2-NADS2/Projeto6.git">Site Web Instituto Alma</a> © 2025 by <a href="https://github.com/2025-2-NADS2/Projeto6.git">FECAP, André Ferreira da Silva, Cauan Moreira da Silva Lima, Rogério Rodrigues Vieira, Victor Bancatelli Lucena Lopes</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International</a><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">
 
 ## 🎓 Referências
 
