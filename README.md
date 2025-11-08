@@ -11,7 +11,7 @@
 
 ## Integrantes: <a href="https://www.linkedin.com/in/andre-ferreira-ab5818379/">André Ferreira</a>, <a href="https://www.linkedin.com/in/cauan-moreira-2a9477335/">Cauan Moreira</a>, <a href="https://www.linkedin.com/in/rogeriorv/">Rogério Vieira</a>, <a href="https://www.linkedin.com/in/victor-bancatelli/">Victor Bancatelli</a>
 
-## Professores Orientadores: <a href="https://www.linkedin.com/in/francisco-escobar/">Francisco Escobar</a>, <a href="https://www.linkedin.com/in/eduardo-savino-gomes-77833a10/">Eduardo Savino Gomes</a>, <a href="https://www.linkedin.com/in/jbuesso/">José Buesso</a>, <a href="https://www.linkedin.com/in/lucymari/">Lucy Mari Tabuti</a>, <a href="https://www.linkedin.com/in/ronaldo-araujo-pinto-3542811a/">Ronaldo Araujo Pinto</a>
+## Professores Orientadores: <a href="https://www.linkedin.com/in/francisco-escobar/">Francisco Escobar</a>, <a href="https://www.linkedin.com/in/eduardo-savino-gomes-77833a10/">Eduardo Savino Gomes</a>, <a href="https://www.linkedin.com/in/jbuesso/">José Buesso</a>, <a href="https://www.linkedin.com/in/victorbarq/">Victor Rosetti</a>, <a href="https://www.linkedin.com/in/ronaldo-araujo-pinto-3542811a/">Ronaldo Araujo Pinto</a>
 
 ## Descrição
 
@@ -34,10 +34,6 @@ A plataforma está sendo construída com uma arquitetura de pilha completa, util
   &emsp;|-->Entrega 1> 
   
   &emsp;|-->Entrega 2>
-  
-  &emsp;|-->Entrega 3>
-  
-  &emsp;|-->Entrega 4>
 
   &emsp;|-->README.md>
   
@@ -47,18 +43,19 @@ A plataforma está sendo construída com uma arquitetura de pilha completa, util
   &emsp;|-->Frontend<br>
 |readme.md<br>
 
-A pasta raiz contem dois arquivos que devem ser alterados:
+## 🛠 Instalação
 
-<b>README.MD</b>: Arquivo que serve como guia e explicação geral sobre seu projeto. O mesmo que você está lendo agora.
+<b>Windows:</b>
 
-Há também 4 pastas que seguem da seguinte forma:
+Não há instalação! Apenas nosso site!
+Encontre o site do instituto alma criado pelo nosso grupo aqui: 
 
-<b>imagens</b>: Imagens do sistema
-
-<b>src</b>: Pasta que contém o código fonte.
-
-
+## 📋 Licença/License
 
 ## 🎓 Referências
 
 Aqui estão as referências usadas no projeto.
+
+1. https://github.com/fecaphub/Template_PI
+
+
