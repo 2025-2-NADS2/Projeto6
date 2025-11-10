@@ -1,0 +1,6 @@
+@Servidor_PI_HostAddress = http://localhost:5116
+
+GET {{Servidor_PI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
