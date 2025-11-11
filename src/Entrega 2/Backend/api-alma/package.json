@@ -1,0 +1,60 @@
+{
+  "name": "instituto-alma-backend",
+  "version": "1.0.0",
+  "description": "Backend API para Instituto Alma - Gestão de atividades, doações e transparência",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "build": "npm install && node deploy-setup.js",
+    "deploy:setup": "node deploy-setup.js",
+    "db:migrate": "node -e \"import('./src/modules/setup/setupController.js').then(m => m.setupDatabase()).catch(console.error)\"",
+    "db:test": "node -e \"import('./src/modules/setup/setupController.js').then(m => m.testDatabase()).catch(console.error)\"",
+    "health": "curl -f http://localhost:$PORT/health || exit 1",
+    "logs": "tail -f logs/*.log",
+    "clean": "rm -rf node_modules && npm install",
+    "prod": "NODE_ENV=production npm start"
+  },
+  "keywords": [
+    "instituto-alma",
+    "api",
+    "nodejs",
+    "express",
+    "postgresql",
+    "jwt",
+    "donations"
+  ],
+  "author": "Instituto Alma",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "compression": "^1.7.4",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.5.1",
+    "helmet": "^7.1.0",
+    "hpp": "^0.2.3",
+    "ioredis": "^5.3.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.6.5",
+    "nodemailer": "^6.9.7",
+    "pg": "^8.11.3",
+    "rate-limit-redis": "^4.0.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seu-usuario/instituto-alma-backend"
+  }
+}

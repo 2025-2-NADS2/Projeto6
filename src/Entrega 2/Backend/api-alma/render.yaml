@@ -1,0 +1,30 @@
+# render.yaml
+services:
+  - type: web
+    name: instituto-alma-backend
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: alma-database
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EMAIL_SECRET  
+        generateValue: true
+      - key: PORT
+        value: 10000
+
+databases:
+  - name: alma-database
+    region: oregon
+    plan: free
+    databaseName: almadb_63jp
+    user: alma_user
