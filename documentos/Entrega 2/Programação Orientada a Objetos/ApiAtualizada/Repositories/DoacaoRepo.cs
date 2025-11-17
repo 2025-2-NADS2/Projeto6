@@ -14,6 +14,14 @@ namespace Servidor_PI.Repositories
             _context = context;
         }
 
+        public async Task<IEnumerable<Doacao>> BuscarTodas()
+        {
+            return await _context.Doacao
+                .Include(d => d.Usuario)
+                .ToListAsync();
+        }
+
+
         public async Task<Doacao> Adicionar(Doacao doacao)
         {
             await _context.Doacao.AddAsync(doacao);

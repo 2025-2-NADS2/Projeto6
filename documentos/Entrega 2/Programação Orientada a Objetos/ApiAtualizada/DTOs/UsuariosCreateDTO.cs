@@ -21,8 +21,6 @@ namespace Servidor_PI.DTOs
         [Required]
         public DateTime? DataNascimento { get; set; }
         public string? Endereco { get; set; }
-
-        
         public bool IsAdmin { get; set; } = false;
     }
 }

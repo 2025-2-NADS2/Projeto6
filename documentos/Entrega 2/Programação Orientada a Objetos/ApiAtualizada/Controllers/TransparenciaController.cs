@@ -40,6 +40,14 @@ namespace Servidor_PI.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] TransparenciaUploadDTO docUpload)
         {
+
+            // EXTRAI O ID DO USUÁRIO LOGADO DO TOKEN JWT
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            if (userIdClaim == null || !int.TryParse(userIdClaim, out int usuarioId))
+            {
+                return Unauthorized("ID de usuário não encontrado no token.");
+            }
+
             if (docUpload.PdfFile == null || docUpload.PdfFile.Length == 0) //verifica se o arquivo existe, ou se esta vazio
             {
                 return BadRequest("Nenhum arquivo enviado");
@@ -65,7 +73,8 @@ namespace Servidor_PI.Controllers
                 Descricao = docUpload.Descricao,
                 LinkDownload = "/uploads_transparencia/" + nomeUnicoArquivo, // Salva o caminho relativo para o download
                 NomeOriginal = docUpload.PdfFile.FileName, //salva o nome original do arquivo 
-                DataPublicacao = DateTime.Now
+                DataPublicacao = DateTime.Now,
+                UsuarioId = usuarioId
 
             };
 

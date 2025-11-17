@@ -41,6 +41,13 @@ namespace Servidor_PI.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromForm]AtividadesUploadDTO atvUpload) //passagem de parametros para criação de nova atividade
         {
+            // EXTRAI O ID DO USUÁRIO LOGADO DO TOKEN JWT
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            if (userIdClaim == null || !int.TryParse(userIdClaim, out int usuarioId))
+            {
+                return Unauthorized("ID de usuário não encontrado no token.");
+            }
+
             if (atvUpload.ImagemArquivo == null || atvUpload.ImagemArquivo.Length == 0) //verifica se o arquivo existe, ou se esta vazio
             {
                 return BadRequest("Nenhuma imagem anexada para Atividade"); // retorna erro caso condição true
@@ -65,7 +72,8 @@ namespace Servidor_PI.Controllers
                 Titulo = atvUpload.Titulo,
                 Descricao = atvUpload.Descricao,
                 LinkImagem = "/imagens_atividades/" + nomeUnicoImg, // Salva o caminho relativo para o download
-                DataPostagem = DateTime.Now
+                DataPostagem = DateTime.Now,
+                UsuarioId = usuarioId
 
             };
 
@@ -158,7 +166,6 @@ namespace Servidor_PI.Controllers
 
                 // C. Atualizar os metadados do DB para o novo arquivo
                 atvExistente.LinkImagem = "/imagens_atividades/" + nomeUnicoArquivo;
-                atvExistente.Titulo = atividade.ImagemArquivo.FileName; // Atualiza o nome original
                 atvExistente.DataPostagem = DateTime.Now; // Opcional: Atualiza a data de publicação
             }
 

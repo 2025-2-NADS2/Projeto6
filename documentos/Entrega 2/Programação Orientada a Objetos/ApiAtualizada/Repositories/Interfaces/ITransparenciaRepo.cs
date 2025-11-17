@@ -1,6 +1,4 @@
 using Servidor_PI.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Servidor_PI.Repositories.Interfaces
 {

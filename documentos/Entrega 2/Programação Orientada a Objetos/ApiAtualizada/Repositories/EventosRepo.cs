@@ -53,10 +53,10 @@ namespace Servidor_PI.Repositories
             // Informa ao Contexto que este objeto existe e está pronto para ser atualizado.
             _context.Eventos.Update(evento);
 
-            // 2. Persiste as mudanças no banco de dados.
+            // Persiste as mudanças no banco de dados.
             var rowsAffected = await _context.SaveChangesAsync();
 
-            // 3. Retorna se a operação teve sucesso.
+            // Retorna se a operação teve sucesso.
             return rowsAffected > 0;
         }
     }

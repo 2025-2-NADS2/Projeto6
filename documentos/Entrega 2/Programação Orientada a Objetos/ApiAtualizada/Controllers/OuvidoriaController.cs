@@ -11,10 +11,12 @@ namespace Servidor_PI.Controllers
     public class OuvidoriaController : ControllerBase
     {
         private readonly IOuvidoriaRepo _repo;//importa a nossa interface para utilizar seus metodos
-        
-        public OuvidoriaController (IOuvidoriaRepo repo)
+        private readonly IEmailService _emailService; // Injeção do Serviço de E-mail
+
+        public OuvidoriaController (IOuvidoriaRepo repo, IEmailService emailService)
         {
             _repo = repo;
+            _emailService = emailService;
         }
 
         [Authorize(Roles = "Admin")]
@@ -39,38 +41,54 @@ namespace Servidor_PI.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Create([FromForm]OuvidoriaUpdateDTO ouv)
+        public async Task<IActionResult> Create([FromForm] OuvidoriaCreateDTO ouv) // Usando o DTO com EmailRemetente
         {
-            var ouvidoria = new Ouvidoria 
+            // Obter e validar o ID do usuário logado (necessário para a FK)
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+
+            // Se o ID não for encontrado no token, é um erro de token/configuração.
+            if (userIdClaim == null || !int.TryParse(userIdClaim, out int usuarioId))
+            {
+                // Este erro só deve ocorrer se o token JWT for inválido ou não contiver o 'id'
+                return Forbid("Informação de ID de usuário ausente ou inválida no token.");
+            }
+
+            // 2. Salvar no Banco de Dados (ignora EmailRemetente do DTO)
+            var ouvidoria = new Ouvidoria
             {
                 Titulo = ouv.Titulo,
                 Descricao = ouv.Descricao,
                 DataOuvidoria = DateTime.Now,
+                UsuarioId = usuarioId // FK preenchida com o ID do usuário logado
             };
 
             _repo.AddOuv(ouvidoria);
             await _repo.Salvar();
+
+            // 3. Enviar E-mail de Notificação 
+            try
+            {
+                var emailBody = $"Nova Mensagem de Ouvidoria (#id: {ouvidoria.Id}) recebida.\n\n" +
+                                $"Título: {ouv.Titulo}\n" +
+                                $"Descrição:\n{ouv.Descricao}\n\n" +
+                                $"--- Detalhes do Contato ---\n" +
+                                $"Remetente (Email): {ouv.EmailRemetente}\n" +
+                                $"Usuário ID (FK): {usuarioId}";
+
+                await _emailService.SendEmailAsync(
+                    "andre3000ferreira@gmail.com", // EMAIL DESTINO DA SUA INSTITUIÇÃO
+                    $"OUVIDORIA: {ouv.Titulo}",
+                    emailBody
+                );
+            }
+            catch (Exception ex)
+            {
+                // Se o e-mail falhar, a mensagem ainda foi salva no DB. Logue o erro.
+                // Não queremos que a falha do e-mail impeça a criação do registro 201.
+                Console.WriteLine($"Erro ao enviar e-mail de ouvidoria: {ex.Message}");
+            }
+
             return CreatedAtAction(nameof(BuscarPorId), new { id = ouvidoria.Id }, ouvidoria);
-            //CreatedAtAction =  Indica que o recurso foi criado com sucesso httpo201 e cria um Location (URL que indica de forma certeira o caminho para encontrar o objeto criado)
-            //nameof (BuscarPorId) = mostra qual action usada pra visualizar o novo objeto "BuscarPorId"
-            // new {id = ouvidoria.id} = gera automaticamente o id do objeto
-            // ouvidoria = retorna o objeto completo, com id adicionado
-        }
-
-        [Authorize(Roles = "Admin")]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletarOuv(int id)
-        {
-            bool excluido = await _repo.DeletarOuv(id); //executa o delete
-
-            if (excluido) //retorna se foi excluido 
-            {
-                return Ok(new { message = "Documento excluído com sucesso." });
-            }
-            else
-            {
-                return NotFound(new { message = "Documento não encontrado." });
-            }
         }
 
         [Authorize(Roles = "Admin")]

@@ -16,7 +16,7 @@ namespace Servidor_PI.Services
 
             if (hasAuthorize)
             {
-                // Adiciona o "cadeado" (mas de forma discreta)
+                 
                 operation.Security = new List<OpenApiSecurityRequirement>
                 {
                     new OpenApiSecurityRequirement

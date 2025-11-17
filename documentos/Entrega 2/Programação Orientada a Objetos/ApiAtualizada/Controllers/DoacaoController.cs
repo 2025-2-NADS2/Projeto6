@@ -1,4 +1,3 @@
-// --- USINGS (Importações de Bibliotecas) ---
 
 using Microsoft.AspNetCore.Authorization; // Necessário para usar atributos como [Authorize] e [AllowAnonymous] (controle de acesso).
 using Microsoft.AspNetCore.Mvc; // Contém a classe base ControllerBase e os atributos [ApiController], [HttpGet], etc., fundamentais para criar APIs.
@@ -18,18 +17,13 @@ namespace Servidor_PI.Controllers // Define o agrupamento lógico da classe (o s
     [Route("api/[controller]")] // Define a rota base da API (ex: /api/doacao, pois [controller] é substituído pelo nome da classe sem 'Controller').
     public class DoacaoController : ControllerBase // Declara a classe, herdando de ControllerBase para obter funcionalidades de API.
     {
-        // --- DEPENDÊNCIAS (Campos Privados) ---
 
         private readonly IDoacaoRepo _repo; // Campo privado para armazenar o Repositório de Doação (acesso ao DB).
         private readonly IConfiguration _config; // Campo privado para armazenar as Configurações (acesso a chaves e URLs).
         private readonly IHttpClientFactory _httpClientFactory; // Campo privado para criar instâncias seguras de HttpClient (para chamadas externas).
 
-        // --- CONSTRUTOR (Injeção de Dependência) ---
 
-        /// <summary>
-        /// Construtor da classe DoacaoController.
-        /// Recebe e armazena as dependências necessárias para operação.
-        /// </summary>
+
         public DoacaoController(IDoacaoRepo repo, IConfiguration config, IHttpClientFactory httpClientFactory)
         {
             _repo = repo; // Repositório injetado para manipulação do banco de dados (buscar, adicionar, atualizar).
@@ -37,119 +31,123 @@ namespace Servidor_PI.Controllers // Define o agrupamento lógico da classe (o s
             _httpClientFactory = httpClientFactory; // Factory injetada para realizar requisições HTTP externas (chamar a API do Mercado Pago).
         }
 
-        // --- ENDPOINT: Criar Preferência de Pagamento ---
 
-        [AllowAnonymous] // Permite que esta rota seja acessada mesmo por usuários não autenticados (se o seu fluxo permitir).
-        [HttpPost] // Define que esta ação responde a requisições HTTP POST (geralmente para criar um novo recurso).
-        // A função é assíncrona (Task<...>) porque faz chamadas de I/O (DB e API externa) e retorna um resultado (IActionResult).
+        [AllowAnonymous] // Permite que esta rota seja acessada mesmo por usuários não autenticados.
+        [HttpPost] // Define que esta ação responde a requisições HTTP POST.
         public async Task<IActionResult> CreatePreference([FromBody] DoacaoCreateDTO dto) // Recebe os dados da doação (valor) no corpo da requisição.
         {
             // 1. valida dto
-            if (!ModelState.IsValid) return BadRequest(ModelState); // Verifica se o DTO recebido é válido (conforme Data Annotations no DTO). Retorna 400 se inválido.
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             // 2. pegar id do usuário do token (claims)
-            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id"); // Tenta encontrar a informação do ID do usuário no token de autenticação (Claims).
-            if (userIdClaim == null) return Unauthorized(); // Se não encontrar o ID (usuário não autenticado), retorna 401.
-            int usuarioId = int.Parse(userIdClaim.Value); // Converte o ID encontrado (que é uma string) para um inteiro.
+            // Inicializa como NULL, permitindo que a doação seja anônima por padrão.
+            int? usuarioId = null;
+            bool isAnonima = true; // Assumimos que é anônima por padrão
+
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id"); // Tenta encontrar a informação do ID do usuário no token.
+
+            // Se o token for válido e o ID puder ser convertido, o usuário está logado.
+            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int parsedId))
+            {
+                usuarioId = parsedId; // Define o ID do usuário logado.
+                isAnonima = false;    // Marca como NÃO anônima.
+            }
+            // Se userIdClaim for null, o código simplesmente continua, com usuarioId = null. 
+            // Isso evita o retorno 'return Unauthorized()'
 
             // 3. criar objeto Doacao local com status pending (ainda sem pagamento)
             var doacao = new Doacao // Cria um novo objeto Doacao, que será salvo no seu banco de dados.
             {
-                Valor = dto.Valor, // Pega o valor da doação do DTO recebido.
-                UsuarioId = usuarioId, // Associa a doação ao ID do usuário autenticado.
-                Status = "pending", // Define o status inicial como pendente (ainda não foi pago).
-                DataCriacao = DateTime.UtcNow // Registra a data de criação da doação.
+                Valor = dto.Valor,
+                UsuarioId = usuarioId, // Será o ID do usuário (se logado) ou null (se anônimo).
+                Anonima = isAnonima, // Propriedade extra para controle de exibição
+                Status = "pending",
+                DataCriacao = DateTime.UtcNow
             };
 
             // adiciona ao contexto (não salva ainda)
-            await _repo.Adicionar(doacao); // Prepara a doação para ser salva no banco de dados.
-            await _repo.Salvar(); // Salva as alterações no banco, garantindo que a variável 'doacao' tenha agora um ID único (`doacao.Id`).
+            await _repo.Adicionar(doacao);
+            await _repo.Salvar();
 
             // 4. Criar preferência no Mercado Pago
-            var accessToken = _config["MercadoPago:AccessToken"]; // Lê o token de acesso (chave secreta) do Mercado Pago das configurações.
-            if (string.IsNullOrEmpty(accessToken)) return StatusCode(500, "Access token do Mercado Pago não configurado."); // Erro interno se a chave não estiver configurada.
+            var accessToken = _config["MercadoPago:AccessToken"];
+            if (string.IsNullOrEmpty(accessToken)) return StatusCode(500, "Access token do Mercado Pago não configurado.");
 
             // montar o body conforme API do Mercado Pago
-            var preference = new // Cria um objeto anônimo (JSON) com as informações que o Mercado Pago exige para criar um checkout.
+            var preference = new
             {
-                items = new[] // Seção para listar os itens a serem cobrados (neste caso, apenas um item "Doação").
+                items = new[]
                 {
-                    new {
-                        title = "Doação", // Nome do item no checkout.
-                        quantity = 1, // Apenas uma unidade.
-                        currency_id = "BRL", // Moeda (Real Brasileiro).
-                        unit_price = (decimal) dto.Valor // O valor da doação.
-                    }
-                },
-                external_reference = doacao.Id.ToString(), // **MUINTO IMPORTANTE:** Este campo é o ID da sua doação no seu banco, usado para vincular o pagamento do MP com sua base de dados.
-                back_urls = new // URLs para onde o usuário será redirecionado após o pagamento.
+            new {
+                title = "Doação",
+                quantity = 1,
+                currency_id = "BRL",
+                unit_price = dto.Valor
+            }
+        },
+                external_reference = doacao.Id.ToString(),
+                back_urls = new
                 {
-                    success = _config["Frontend:UrlSuccess"] ?? "https://seufrontend/sucesso", // URL de sucesso (lida das configurações, com fallback).
-                    failure = _config["Frontend:UrlFailure"] ?? "https://seufrontend/falha", // URL de falha.
-                    pending = _config["Frontend:UrlPending"] ?? "https://seufrontend/pendente" // URL de pendente.
+                    success = _config["Frontend:UrlSuccess"] ?? "https://seufrontend/sucesso",
+                    failure = _config["Frontend:UrlFailure"] ?? "https://seufrontend/falha",
+                    pending = _config["Frontend:UrlPending"] ?? "https://seufrontend/pendente"
                 },
-                auto_return = "approved" // Configura para retornar automaticamente à URL de sucesso após a aprovação.
+                auto_return = "approved"
             };
 
-            var client = _httpClientFactory.CreateClient(); // Cria um novo HttpClient (instância para fazer requisição externa).
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken); // Define o cabeçalho de autorização (o token secreto do MP).
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json")); // Indica que a requisição espera uma resposta em formato JSON.
+            var client = _httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var json = JsonSerializer.Serialize(preference); // Converte o objeto 'preference' criado acima em uma string JSON.
-            var content = new StringContent(json, Encoding.UTF8, "application/json"); // Cria o conteúdo da requisição HTTP (o corpo JSON codificado).
+            var json = JsonSerializer.Serialize(preference);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             // endpoint de criação de preference
-            var mpResponse = await client.PostAsync("https://api.mercadopago.com/checkout/preferences", content); // Faz a chamada POST assíncrona para a API do Mercado Pago.
-            var responseBody = await mpResponse.Content.ReadAsStringAsync(); // Lê a resposta completa (o JSON retornado) como uma string.
+            var mpResponse = await client.PostAsync("https://api.mercadopago.com/checkout/preferences", content);
+            var responseBody = await mpResponse.Content.ReadAsStringAsync();
 
-            if (!mpResponse.IsSuccessStatusCode) // Verifica se a requisição ao Mercado Pago não foi bem-sucedida (status code diferente de 2xx).
+            if (!mpResponse.IsSuccessStatusCode)
             {
-                // registrar log aqui se quiser
-                return StatusCode((int)mpResponse.StatusCode, responseBody); // Retorna o código de erro do MP para o seu cliente.
+                return StatusCode((int)mpResponse.StatusCode, responseBody);
             }
 
             // parse do retorno (acessa init_point e sandbox_init_point)
-            using var doc = JsonDocument.Parse(responseBody); // Analisa a string JSON de resposta do MP em uma estrutura de documento.
-            var root = doc.RootElement; // Pega o elemento raiz do JSON.
+            using var doc = JsonDocument.Parse(responseBody);
+            var root = doc.RootElement;
 
-            string checkoutLink = ""; // Variável para armazenar o link de checkout (onde o usuário pagará).
-            if (root.TryGetProperty("init_point", out var initPoint)) // Tenta buscar a propriedade 'init_point' (link de produção).
+            string checkoutLink = "";
+            if (root.TryGetProperty("init_point", out var initPoint))
             {
-                checkoutLink = initPoint.GetString() ?? ""; // Armazena o link.
+                checkoutLink = initPoint.GetString() ?? "";
             }
-            else if (root.TryGetProperty("sandbox_init_point", out var sandboxInit)) // Tenta buscar 'sandbox_init_point' (link de teste, se o token for de teste).
+            else if (root.TryGetProperty("sandbox_init_point", out var sandboxInit))
             {
-                checkoutLink = sandboxInit.GetString() ?? ""; // Armazena o link.
+                checkoutLink = sandboxInit.GetString() ?? "";
             }
 
             // 5. atualizar a doacao com o link de checkout e salvar
-            doacao.CheckoutLink = checkoutLink; // Armazena o link de checkout na sua doação no banco de dados.
-            await _repo.Atualizar(doacao); // Atualiza o registro no banco com o link do MP.
-            // (UpdateAsync no repo faz SaveChanges dentro no exemplo acima)
+            doacao.CheckoutLink = checkoutLink;
+            await _repo.Atualizar(doacao);
 
             // 6. retornar o link para o cliente
-            var result = new DoacaoViewDTO // Cria o DTO de retorno para o cliente.
+            var result = new DoacaoViewDTO // Assumindo que seu DTO tem o campo CheckoutLink
             {
-                Id = doacao.Id, // ID da sua doação.
+                Id = doacao.Id,
                 Valor = doacao.Valor,
                 Status = doacao.Status,
-                CheckoutLink = doacao.CheckoutLink, // O link que o cliente deve usar para redirecionar para o pagamento.
+                CheckoutLink = doacao.CheckoutLink,
                 DataCriacao = doacao.DataCriacao
             };
 
-            return Ok(result); // Retorna 200 OK com o objeto contendo o link de pagamento.
+            return Ok(result);
         }
 
-        // --- ENDPOINT: Webhook (Receber Notificações de Pagamento) ---
-
-        // =========================
         // Webhook: Mercado Pago envia notificações aqui
-        // =========================
         [AllowAnonymous] // Deve ser anônimo, pois o Mercado Pago é quem faz a chamada, não um usuário autenticado.
         [HttpPost("webhook")] // Define a rota específica para o webhook (ex: /api/doacao/webhook).
         public async Task<IActionResult> Webhook([FromBody] JsonElement body) // Recebe o corpo da notificação (webhook) como um elemento JSON genérico.
         {
-            // 1. --- VALIDAÇÃO DE ASSINATURA SECRETA ---
+            // VALIDAÇÃO DE ASSINATURA SECRETA 
             var secretConfig = _config["MercadoPago:WebhookSecret"]; // Lê o segredo de validação do webhook (chave de segurança) das configurações.
 
             // Tenta obter o cabeçalho "X-Secret" que o MP envia
@@ -168,15 +166,13 @@ namespace Servidor_PI.Controllers // Define o agrupamento lógico da classe (o s
             // Pega o primeiro valor do header e compara com a configuração
             var secretValue = signatureHeader.FirstOrDefault(); // Extrai a string real do valor do cabeçalho.
 
-            // 3. COMPARA AS CHAVES
+            // COMPARA AS CHAVES
             // Use String.Equals para comparação segura entre strings
             if (secretValue == null || !secretValue.Equals(secretConfig, StringComparison.Ordinal)) // Compara o valor recebido com o valor configurado (validação de segurança).
             {
                 // Resposta 401: Rejeitar a requisição com segredo incorreto
                 return Unauthorized("Assinatura secreta inválida."); // Retorna 401: a assinatura de segurança não confere.
             }
-            // --- FIM DA VALIDAÇÃO ---
-
 
             // O Mercado Pago envia backgrounds notifications que podem conter 'id' e 'topic' (ou resource)
             // Vamos pegar as informações e consultar a API do Mercado Pago para detalhes do pagamento.
@@ -184,8 +180,6 @@ namespace Servidor_PI.Controllers // Define o agrupamento lógico da classe (o s
             {
                 Console.WriteLine("Webhook recebido do Mercado Pago:"); // Loga o recebimento.
                 Console.WriteLine(body.ToString()); // Loga o corpo da requisição para inspeção.
-                // extrair id do recurso enviado (varia conforme configuração do MP)
-                // Exemplo de corpo: { "id": "123456", "topic": "payment" }
                 string resourceId = ""; // ID do pagamento ou recurso no Mercado Pago.
                 string topic = ""; // Tipo de evento (ex: payment, merchant_order).
 
@@ -268,7 +262,7 @@ namespace Servidor_PI.Controllers // Define o agrupamento lógico da classe (o s
                 }
 
                 // responder 200 OK para Mercado Pago (ele entende que recebemos)
-                return Ok(); // **MUITO IMPORTANTE:** Retorna 200 OK para o Mercado Pago, indicando que a notificação foi processada com sucesso.
+                return Ok(); // Retorna 200 OK para o Mercado Pago, indicando que a notificação foi processada com sucesso.
             }
             catch (Exception ex) // Bloco de tratamento de erros.
             {
@@ -278,11 +272,10 @@ namespace Servidor_PI.Controllers // Define o agrupamento lógico da classe (o s
             }
         }
 
-        // --- ENDPOINT: Listar Doações do Usuário ---
+   
 
-        // =========================
-        // Listar doações do usuário autenticado
-        // =========================
+
+        // Listar doações do usuário autenticado==
         [Authorize] // **IMPORTANTE:** Define que esta rota SÓ pode ser acessada por um usuário AUTENTICADO.
         [HttpGet("me")] // Define a rota GET específica para listar as doações do usuário logado (ex: /api/doacao/me).
         public async Task<IActionResult> MyDonations() // Ação que retorna uma lista de doações.
@@ -303,6 +296,15 @@ namespace Servidor_PI.Controllers // Define o agrupamento lógico da classe (o s
             }).ToList(); // Converte a lista para um tipo List<DoacaoViewDTO>.
 
             return Ok(dtoList); // Retorna 200 OK com a lista de doações do usuário.
+        }
+
+        // GET: api/Doacao/admin
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin")]
+        public async Task<IActionResult> ListAll()
+        {
+            var lista = await _repo.BuscarTodas();
+            return Ok(lista);
         }
     }
 }

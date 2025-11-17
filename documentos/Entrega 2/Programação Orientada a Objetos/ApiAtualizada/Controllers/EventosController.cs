@@ -42,6 +42,13 @@ namespace Servidor_PI.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] EventosUploadDTO eveUpload)
         {
+
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            if (userIdClaim == null || !int.TryParse(userIdClaim, out int usuarioId))
+            {
+                return Unauthorized("ID de usuário não encontrado no token.");
+            }
+
             if (eveUpload.ImagemArquivo == null || eveUpload.ImagemArquivo.Length == 0) //verifica se o arquivo existe, ou se esta vazio
             {
                 return BadRequest("Nenhuma imagem anexada para Evento");
@@ -68,7 +75,8 @@ namespace Servidor_PI.Controllers
                 LocalEvento = eveUpload.LocalEvento,
                 LinkImagem = "/imagens_eventos/" + nomeUnicoImg, // Salva o caminho relativo da imagem.
                 DataEvento = eveUpload.DataEvento,
-                DataPostagem = DateTime.Now
+                DataPostagem = DateTime.Now,
+                UsuarioId = usuarioId
 
             };
 

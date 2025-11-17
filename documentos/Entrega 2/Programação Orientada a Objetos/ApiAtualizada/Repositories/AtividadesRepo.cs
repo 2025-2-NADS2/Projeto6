@@ -37,7 +37,7 @@ namespace Servidor_PI.Repositories
         {
             var atividade = await _context.Atividades.FindAsync(id);
 
-            if (atividade != null) // retorna caso a atividade exista
+            if (atividade == null) 
             {
                 return false;
             }

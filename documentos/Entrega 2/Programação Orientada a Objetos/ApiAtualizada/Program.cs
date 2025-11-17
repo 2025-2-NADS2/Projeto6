@@ -21,6 +21,24 @@ builder.Services.AddControllers(); // Adiciona suporte a Controllers com Views (
 builder.Services.AddEndpointsApiExplorer(); // Necessário para o Swagger descobrir os endpoints da API.
 
 // ------------------------------------------------------
+// Configuração do CORS 
+// ------------------------------------------------------
+builder.Services.AddCors(options =>
+{
+    // Define a política que permite o acesso do seu frontend React (Vite)
+    options.AddPolicy(name: "AllowFrontend",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5173") // ORIGEM DO SEU FRONTEND LOCAL
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        });
+});
+
+
+
+// ------------------------------------------------------
 // Configuração do Swagger 
 // ------------------------------------------------------
 builder.Services.AddSwaggerGen(c => // Configura o gerador de documentação Swagger.
@@ -30,7 +48,7 @@ builder.Services.AddSwaggerGen(c => // Configura o gerador de documentação Swagg
     {
         Title = "Instituto Alma - API",
         Version = "v1",
-        Description = "API do Instituto Alma com autenticação JWT (visual limpo e organizado)"
+        Description = "API do Instituto Alma com autenticação JWT"
     });
 
     // Evita modelos duplicados e nomes confusos
@@ -61,6 +79,8 @@ builder.Services.AddDbContext<AppDbContext>(options => // Registra o AppDbContex
 // Injeção de Dependência (repos e serviços)
 // ------------------------------------------------------
 // Registra as interfaces e suas implementações concretas no escopo da requisição (Scoped).
+
+builder.Services.AddScoped<IEmailService, EmailService>(); // Registra a interface IEmailService e a classe EmailService
 builder.Services.AddScoped<IAtividadeRepo, AtividadesRepo>(); // Injeta IAtividadeRepo quando solicitado, usando AtividadesRepo.
 builder.Services.AddScoped<ITransparenciaRepo, TransparenciaRepo>(); // Repositório de Transparência.
 builder.Services.AddScoped<IOuvidoriaRepo, OuvidoriaRepo>(); // Repositório de Ouvidoria.
@@ -102,6 +122,14 @@ builder.Services.AddAuthentication(options => // Configura o esquema padrão de a
 // ------------------------------------------------------
 var app = builder.Build(); // Constrói a aplicação com todas as configurações de serviços.
 
+// Rodar seeder ao iniciar o servidor
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    SeedData.Initialize(services);
+}
+
+
 // Executado apenas em ambiente de desenvolvimento.
 if (app.Environment.IsDevelopment())
 {
@@ -124,8 +152,12 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
 }
 
+// ------------------------------------------------------
+// Adiciona o Middleware de CORS 
+// ------------------------------------------------------
+app.UseCors("AllowFrontend"); // Aplica a política de CORS que permite o frontend.
 
-
+app.UseStaticFiles();
 
 app.UseHttpsRedirection(); // Redireciona requisições HTTP para HTTPS (boa prática de segurança).
 app.UseAuthentication(); // Adiciona o middleware de Autenticação (deve sempre vir antes da Autorização).

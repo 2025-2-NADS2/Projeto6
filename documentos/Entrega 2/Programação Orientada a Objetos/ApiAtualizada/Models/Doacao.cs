@@ -25,7 +25,7 @@ namespace Servidor_PI.Models
         public DateTime? DataPagamento { get; set; }
 
         // FK para o usuário que realizou a doação
-        public int UsuarioId { get; set; }
+        public int? UsuarioId { get; set; }
         public Usuarios Usuario { get; set; }
 
 

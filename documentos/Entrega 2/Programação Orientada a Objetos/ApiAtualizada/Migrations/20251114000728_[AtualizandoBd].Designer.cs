@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Servidor_PI.Data;
 
@@ -10,9 +11,11 @@ using Servidor_PI.Data;
 namespace Servidor_PI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251114000728_[AtualizandoBd]")]
+    partial class AtualizandoBd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.10");
@@ -90,7 +93,7 @@ namespace Servidor_PI.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("doacao_status");
 
-                    b.Property<int?>("UsuarioId")
+                    b.Property<int>("UsuarioId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("UsuariosId")
@@ -300,7 +303,8 @@ namespace Servidor_PI.Migrations
                     b.HasOne("Servidor_PI.Models.Usuarios", "Usuario")
                         .WithMany()
                         .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Servidor_PI.Models.Usuarios", null)
                         .WithMany("Doacao")
